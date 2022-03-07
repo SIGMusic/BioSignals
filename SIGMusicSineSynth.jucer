@@ -4,6 +4,16 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="Hk25AW" name="SIGMusicSineSynth">
     <GROUP id="{B89388B0-8E05-AAF1-10D2-12ECB4818E2C}" name="Source">
+      <GROUP id="{AAAC1126-0EAA-BA60-E86A-559397850EF9}" name="JUCESerial">
+        <FILE id="OwYTlP" name="juce_serialport.h" compile="0" resource="0"
+              file="Source/JUCESerial/juce_serialport.h"/>
+        <FILE id="FO1Mq2" name="juce_serialport_iOS.cpp" compile="1" resource="0"
+              file="Source/JUCESerial/juce_serialport_iOS.cpp"/>
+        <FILE id="EXsrT3" name="juce_serialport_OSX.cpp" compile="1" resource="0"
+              file="Source/JUCESerial/juce_serialport_OSX.cpp"/>
+        <FILE id="DZ6201" name="juce_serialport_Windows.cpp" compile="1" resource="0"
+              file="Source/JUCESerial/juce_serialport_Windows.cpp"/>
+      </GROUP>
       <FILE id="tgi62t" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="Ww4Kgx" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="CUWvji" name="MainComponent.cpp" compile="1" resource="0"
