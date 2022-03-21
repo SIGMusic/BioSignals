@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="dnDa9y" name="SIGMusicSineSynth" projectType="guiapp" useAppConfig="0"
+<JUCERPROJECT id="dnDa9y" name="SIGMusicBiosignals" projectType="guiapp" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
-  <MAINGROUP id="Hk25AW" name="SIGMusicSineSynth">
+  <MAINGROUP id="Hk25AW" name="SIGMusicBiosignals">
     <GROUP id="{B89388B0-8E05-AAF1-10D2-12ECB4818E2C}" name="Source">
       <GROUP id="{AAAC1126-0EAA-BA60-E86A-559397850EF9}" name="JUCESerial">
         <FILE id="OwYTlP" name="juce_serialport.h" compile="0" resource="0"

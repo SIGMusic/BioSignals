@@ -38,8 +38,15 @@ MainComponent::MainComponent()
   };
 
   //open the specified port on the system
+  juce::StringPairArray portlist = SerialPort::getSerialPortPaths();
+  if (portlist.size() == 0)
+    juce::Logger::getCurrentLogger()->writeToLog("No serial ports available");
+  for (const juce::String& key : portlist.getAllKeys()) {
+    juce::Logger::getCurrentLogger()->writeToLog(key);
+  }
+    
   sp = std::unique_ptr<SerialPort>(new SerialPort(
-    "/dev/ttys003",
+    portlist.getAllValues()[0],
     SerialPortConfig(9600,
                      8,
                      SerialPortConfig::SERIALPORT_PARITY_NONE,
