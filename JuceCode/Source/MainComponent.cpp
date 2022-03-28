@@ -181,18 +181,20 @@ juce::String MainComponent::getPortBlockingSerialDialog(
     juce::OptionalScopedPointer<juce::Component>(&dropdown, false /* no ownership */);
 
   const juce::StringArray& ports = portlist.getAllKeys();
-  int id = 0;
+  int id = 1;
   for (const juce::String& key : ports) {
     dropdown.addItem(key, id);
     ++id;
   }
+  
+  dropdown.setSize(300, 30);
   
   juce::String choice;
 
   dropdown.onChange = [&](void) {
     choice = ports[dropdown.getSelectedId()];
   };
-  dropdown.setSelectedId(0);
+  dropdown.setSelectedId(1);
   
   int status = window_launcher.runModal();
   if (status != 0) {
