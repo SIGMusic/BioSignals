@@ -44,9 +44,14 @@ MainComponent::MainComponent()
   for (const juce::String& key : portlist.getAllKeys()) {
     juce::Logger::getCurrentLogger()->writeToLog(key);
   }
-    
+  for (const juce::String& value : portlist.getAllValues()) {
+    juce::Logger::getCurrentLogger()->writeToLog(value);
+  }
+  
+  juce::String selection = getPortBlockingSerialDialog(portlist);
+
   sp = std::unique_ptr<SerialPort>(new SerialPort(
-    portlist.getAllValues()[0],
+    portlist[selection],
     SerialPortConfig(9600,
                      8,
                      SerialPortConfig::SERIALPORT_PARITY_NONE,
@@ -161,4 +166,38 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
     levelSlider.setValue(
         juce::jmin((double) new_val / 100.0, levelSlider.getMaximum()));
   }
+}
+
+//==============================================================================
+
+juce::String MainComponent::getPortBlockingSerialDialog(
+    const juce::StringPairArray& portlist) {
+  juce::DialogWindow::LaunchOptions window_launcher;
+  window_launcher.dialogTitle = "Select a serial port";
+  window_launcher.componentToCentreAround = this;
+
+  juce::ComboBox dropdown;
+  window_launcher.content =
+    juce::OptionalScopedPointer<juce::Component>(&dropdown, false /* no ownership */);
+
+  const juce::StringArray& ports = portlist.getAllKeys();
+  int id = 0;
+  for (const juce::String& key : ports) {
+    dropdown.addItem(key, id);
+    ++id;
+  }
+  
+  juce::String choice;
+
+  dropdown.onChange = [&](void) {
+    choice = ports[dropdown.getSelectedId()];
+  };
+  dropdown.setSelectedId(0);
+  
+  int status = window_launcher.runModal();
+  if (status != 0) {
+    juce::JUCEApplicationBase::quit();
+  }
+  
+  return choice;
 }

@@ -28,6 +28,7 @@ public:
     void resized() override;
 
 private:
+    juce::String getPortBlockingSerialDialog(const juce::StringPairArray& portlist);
     //==============================================================================
     juce::Random random;
     juce::IIRFilter bp_filter;
@@ -40,6 +41,7 @@ private:
     juce::Label freqLabel;
     juce::Slider qSlider{juce::Slider::SliderStyle::LinearHorizontal,
                             juce::Slider::TextEntryBoxPosition::TextBoxBelow};
+
     juce::Label qLabel;
     double sample_rate = 48000.0;
   
