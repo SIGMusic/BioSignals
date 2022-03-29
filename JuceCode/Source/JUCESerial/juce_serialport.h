@@ -240,7 +240,7 @@ public:
 	{
 		signalThreadShouldExit();
         cancel ();
-        waitForThreadToExit (5000);
+        waitForThreadToExit(5000);
 //        juce::Logger::outputDebugString ("waiting for SerialPortOutputStream thread to end");
 //         if (! waitForThreadToExit (5000))
 //             juce::Logger::outputDebugString ("thread did not exit");

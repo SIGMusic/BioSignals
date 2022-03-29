@@ -1,0 +1,70 @@
+#N canvas 8 0 1522 810 10;
+#X obj 164 297 osc~ 440;
+#X msg 272 26 devices;
+#X text 131 25 list number of devices;
+#X floatatom 284 260 5 0 255 0 - - -, f 5;
+#X obj 354 292 vsl 15 128 0 255 0 0 empty empty empty 0 -9 0 10 #fcfcfc
+#000000 #000000 0 1;
+#X obj 155 386 *~ 1;
+#X msg 77 330 0;
+#X msg 40 333 1;
+#X obj 168 253 + 50;
+#N canvas 0 0 450 300 (subpatch) 0;
+#X array $array1 100 float 3 black black;
+#A 0 0.151869 0.165258 0.178616 0.191942 0.205233 0.218487 0.231699
+0.244867 0.25799 0.271067 0.284094 0.297069 0.30999 0.322854 0.33566
+0.348405 0.361081 0.373691 0.386232 0.398703 0.411102 0.423426 0.435672
+0.447839 0.459925 0.471924 0.483832 0.495652 0.507382 0.51902 0.530562
+0.542009 0.553356 0.564603 0.575747 0.586777 0.5977 0.608514 0.619217
+0.629807 0.640282 0.650641 0.660881 0.671001 0.680994 0.690857 0.700593
+0.710202 0.719682 0.72903 0.738246 0.747327 0.756272 0.76508 0.773737
+0.782251 0.790623 0.798851 0.806934 0.814869 0.822656 0.830293 0.837779
+0.845107 0.852273 0.859284 0.866138 0.872834 0.87937 0.885747 0.891962
+0.898015 0.903905 0.909617 0.915162 0.920539 0.925749 0.93079 0.935662
+0.940363 0.944893 0.94925 0.95343 0.957426 0.961247 0.964893 0.968364
+0.971658 0.974774 0.977714 0.980475 0.983057 0.985448 0.987656 0.989684
+0.991532 0.993199 0.994685 0.99599 0.997114;
+#X coords 0 1 100 -1 200 140 1;
+#X restore 430 308 graph;
+#X obj 212 349 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 142 441 tabwrite~ $array1;
+#X obj 241 378 metro 200;
+#X obj 271 55 comport 0 9600;
+#X text 828 64 Sound Simulator : Arduino To Pure Data (Tutorial) (https://www.youtube.com/watch?v=eVW0FD9g_Sk)
+;
+#X obj 284 94 sel 13 10;
+#X obj 279 148 zl group 100;
+#X obj 279 170 iem_alisttosym;
+#X obj 278 196 fromsymbol;
+#X floatatom 280 218 5 0 0 0 - - -, f 5;
+#X text 328 4 replace number with port number;
+#X msg 330 26 open 3;
+#X obj 169 100 print;
+#X msg 397 25 close;
+#X text 378 56 0 to 1023;
+#X text 370 94 if it matches a 10 \, then sends a bang \, else send
+the float itself;
+#X text 376 150 stores floats that it receives. if it receives a bang
+\, outputs the list;
+#X text 386 175 converts a list of ASCII characters to a symbol;
+#X text 364 196 conversts symbol to the message itself??? like "symbol
+asdf" to "asdf";
+#X connect 0 0 5 0;
+#X connect 1 0 13 0;
+#X connect 3 0 4 0;
+#X connect 4 0 8 0;
+#X connect 5 0 11 0;
+#X connect 6 0 5 1;
+#X connect 7 0 5 1;
+#X connect 8 0 0 0;
+#X connect 10 0 12 0;
+#X connect 12 0 11 0;
+#X connect 13 0 15 0;
+#X connect 15 0 16 0;
+#X connect 15 2 16 0;
+#X connect 16 0 17 0;
+#X connect 17 0 18 0;
+#X connect 18 0 19 0;
+#X connect 21 0 13 0;
+#X connect 23 0 13 0;
