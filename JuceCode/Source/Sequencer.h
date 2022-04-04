@@ -35,4 +35,5 @@ public:
 private:
   double notesPerMinute_;
   juce::Array<juce::uint8> sequence_;
+  juce::ToneGeneratorAudioSource synth_;
 };
