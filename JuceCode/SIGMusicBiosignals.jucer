@@ -6,8 +6,8 @@
   <MAINGROUP id="Hk25AW" name="SIGMusicBiosignals">
     <GROUP id="{B89388B0-8E05-AAF1-10D2-12ECB4818E2C}" name="Source">
       <GROUP id="{BEC5C87C-5400-0837-EB0F-05F2076E7172}" name="SynthComponents">
-        <FILE id="P1wDY6" name="Arpeggiator.cpp" compile="1" resource="0" file="Source/Arpeggiator.cpp"/>
-        <FILE id="KSGUKV" name="Arpeggiator.h" compile="0" resource="0" file="Source/Arpeggiator.h"/>
+        <FILE id="P1wDY6" name="Sequencer.cpp" compile="1" resource="0" file="Source/Sequencer.cpp"/>
+        <FILE id="KSGUKV" name="Sequencer.h" compile="0" resource="0" file="Source/Sequencer.h"/>
       </GROUP>
       <GROUP id="{AAAC1126-0EAA-BA60-E86A-559397850EF9}" name="JUCESerial">
         <FILE id="OwYTlP" name="juce_serialport.h" compile="0" resource="0"
