@@ -23,22 +23,26 @@ Sequencer::Sequencer(const juce::Array<juce::uint8>& sequence)
 */
 void Sequencer::setTempo(double notesPerMinute)
 {
-  
+  // sampleRate = samps/sec
+  // notesPerMinute = notes/min = notes/(60 sec)
+  // samplesPerSecond / notesPerSecond = samps/note
 }
 
-virtual void Sequencer::prepareToPlay(
-    int samplesPerBlockExpected, double sampleRate) override
+void Sequencer::prepareToPlay(
+    int samplesPerBlockExpected, double sampleRate)
 {
   
 }
 
-virtual void Sequencer::releaseResources() override
+void Sequencer::releaseResources()
 {
   
 }
 
-virtual void Sequencer::getNextAudioBlock(
-    const juce::AudioSourceChannelInfo &bufferToFill) override
+void Sequencer::getNextAudioBlock(
+    const juce::AudioSourceChannelInfo &bufferToFill)
 {
+  // if past threshold, then change frequency of synthesizer
+  // [6 3 8 5 2]
   
 }

@@ -36,4 +36,10 @@ private:
   double notesPerMinute_;
   juce::Array<juce::uint8> sequence_;
   juce::ToneGeneratorAudioSource synth_;
+  int samplesPerBlockExpected_;
+  double sampleRate_;
+
+  const size_t samplesPerNote_;
+  size_t currPeriodSamples_;
+  juce::uint8 currIdx_;
 };
