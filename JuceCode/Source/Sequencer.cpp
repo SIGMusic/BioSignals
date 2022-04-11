@@ -10,9 +10,10 @@
 
 #include "Sequencer.h"
 
-Sequencer::Sequencer(const juce::Array<juce::uint8>& sequence)
+Sequencer::Sequencer(const juce::Array<juce::uint8>& sequence, double tempo)
 {
-  
+  sequence_ = sequence;
+  notesPerMinute_ = tempo;
 }
 
 /*
@@ -26,23 +27,26 @@ void Sequencer::setTempo(double notesPerMinute)
   // sampleRate = samps/sec
   // notesPerMinute = notes/min = notes/(60 sec)
   // samplesPerSecond / notesPerSecond = samps/note
+  notesPerMinute_ = notesPerMinute;
 }
 
 void Sequencer::prepareToPlay(
-    int samplesPerBlockExpected, double sampleRate)
+    int samplesPerBlockExpected, double sampleRate) override
 {
-  
+  samplesPerBlockExpected_ = samplesPerBlockExpected;
+  sampleRate_ = sampleRate;
 }
 
-void Sequencer::releaseResources()
+void Sequencer::releaseResources() override
 {
   
 }
 
 void Sequencer::getNextAudioBlock(
-    const juce::AudioSourceChannelInfo &bufferToFill)
-{
+    const juce::AudioSourceChannelInfo &bufferToFill) override
+{  
   // if past threshold, then change frequency of synthesizer
   // [6 3 8 5 2]
   
 }
+
