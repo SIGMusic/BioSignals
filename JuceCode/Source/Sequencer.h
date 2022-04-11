@@ -14,7 +14,7 @@
 class Sequencer : public juce::AudioSource
 {
 public:
-  Sequencer(const juce::Array<juce::uint8>& sequence);
+  Sequencer(const juce::Array<juce::uint8>& sequence, double tempo = 60.0);
 
   /*
   *  Set the tempo of this Sequencer.
@@ -33,13 +33,14 @@ public:
       const juce::AudioSourceChannelInfo &bufferToFill) override;
 
 private:
-  double notesPerMinute_;
+  static inline double midiToFreq(juce::uint8 midi_note);
+
   juce::Array<juce::uint8> sequence_;
   juce::ToneGeneratorAudioSource synth_;
   int samplesPerBlockExpected_;
-  double sampleRate_;
+  double sampleRate_ = 48000.0 /* default sample rate */;
 
-  const size_t samplesPerNote_;
+  size_t samplesPerNote_;
   size_t currPeriodSamples_;
   juce::uint8 currIdx_;
 };
