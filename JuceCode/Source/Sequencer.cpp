@@ -60,3 +60,4 @@ void Sequencer::getNextAudioBlock(
 inline double Sequencer::midiToFreq(juce::uint8 midi_note) {
   return 440.0 * std::powf(2.0, midi_note / 12.0);
 }
+
