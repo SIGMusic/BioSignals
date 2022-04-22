@@ -10,8 +10,8 @@
 
 #include "Sequencer.h"
 
-Sequencer::Sequencer(const juce::Array<juce::uint8>& sequence, double tempo) :
-    sequence_(sequence), samplesPerNote_(sampleRate_) { }
+Sequencer::Sequencer(FrequencyGenerator* fg, double tempo) :
+    freqGen_(fg), samplesPerNote_(sampleRate_) { }
 
 /*
 *  Set the tempo of this Sequencer.
@@ -50,14 +50,10 @@ void Sequencer::getNextAudioBlock(
     if (currPeriodSamples_ > samplesPerNote_)
     {
       currPeriodSamples_ = 0;
-      synth_.setFrequency(midiToFreq((++currIdx_) % sequence_.size()));
+      synth_.setFrequency(freqGen_->getNextFreq());
     }
     
     // fill the buffer here
   }
-}
-
-inline double Sequencer::midiToFreq(juce::uint8 midi_note) {
-  return 440.0 * std::powf(2.0, midi_note / 12.0);
 }
 
