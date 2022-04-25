@@ -1,5 +1,9 @@
 #define USE_ARDUINO_INTERRUPTS true    // Set-up low-level interrupts for most acurate BPM math.
 #include <PulseSensorPlayground.h>     // Includes the PulseSensorPlayground Library.
+#include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_LIS3DH.h>
+#include <Adafruit_Sensor.h>
 
 const int PulseWire = 0;       // PulseSensor PURPLE WIRE connected to ANALOG PIN 0
 const int LED13 = 13;          // The on-board Arduino LED, close to PIN 13.
@@ -11,6 +15,9 @@ static int Threshold = 550;           // Determine which Signal to "count as a b
 #define TEMP1 (0x01)
 #define TEMP2 (0x02)
 #define PULSE (0x03)
+#define ACCLX (0x04)
+#define ACCLY (0x05)
+#define ACCLZ (0x06)
 
 // Signal Pins
 #define PIN_TEMP1 (A1)
@@ -18,14 +25,33 @@ static int Threshold = 550;           // Determine which Signal to "count as a b
 #define PIN_PULSE (A0)
 
 // For debugging mode uncomment this line
-#define DEBUG (1)
+//#define DEBUG (1)
 
 PulseSensorPlayground pulseSensor;  // Creates an instance of the PulseSensorPlayground object called "pulseSensor"
+
+// I2C
+Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
+  while (!Serial) delay(10);     // will pause Zero, Leonardo, etc until serial console opens
+
+  Serial.println("LIS3DH test!");
+
+  if (! lis.begin(0x18)) {   // change this to 0x19 for alternative i2c address
+    Serial.println("Couldnt start");
+    while (1) yield();
+  }
+  Serial.println("LIS3DH found!");
+
+  // lis.setRange(LIS3DH_RANGE_4_G);   // 2, 4, 8 or 16 G!
+
+  Serial.print("Range = "); Serial.print(2 << lis.getRange());
+  Serial.println("G");
+
+  lis.setDataRate(LIS3DH_DATARATE_100_HZ);
 
   // Configure the PulseSensor object, by assigning our variables to it. 
   pulseSensor.analogInput(PulseWire);   
@@ -40,15 +66,17 @@ void setup() {
 
 #ifndef DEBUG
 void loop() {
-  rw_temp1();
+  //rw_temp1(); // burns if used...
   rw_temp2();
   rw_pulse();
+  rw_accl();
 }
 #else
 void loop() {
   rw_temp1_debug();
   rw_temp2_debug();
   rw_pulse_debug();
+  rw_accl_debug();
 }
 #endif // DEBUG
 
@@ -92,6 +120,32 @@ void rw_pulse() {
 
   //delay(20);                    // considered best practice in a simple sketch.
   return;
+}
+
+void rw_accl() {
+  sensors_event_t event;
+  lis.getEvent(&event);
+
+  /* Display the results (acceleration is measured in m/s^2) */
+  Serial.print(ACCLX); 
+  Serial.println(event.acceleration.x);
+  Serial.print(ACCLY); 
+  Serial.println(event.acceleration.y);
+  Serial.print(ACCLZ);
+  Serial.println(event.acceleration.z);
+}
+
+void rw_accl_debug() {
+  sensors_event_t event;
+  lis.getEvent(&event);
+
+  /* Display the results (acceleration is measured in m/s^2) */
+  Serial.println("Accl x,y,z"); 
+  Serial.println(event.acceleration.x);
+  //Serial.print(ACCLY); 
+  Serial.println(event.acceleration.y);
+  //Serial.print(ACCLZ);
+  Serial.println(event.acceleration.z);
 }
 
 void rw_temp1_debug() {
