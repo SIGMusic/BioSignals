@@ -36,20 +36,20 @@ Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
-  while (!Serial) delay(10);     // will pause Zero, Leonardo, etc until serial console opens
+  //while (!Serial) delay(10);     // will pause Zero, Leonardo, etc until serial console opens
 
-  Serial.println("LIS3DH test!");
+  //Serial.println("LIS3DH test!");
 
-  if (! lis.begin(0x18)) {   // change this to 0x19 for alternative i2c address
-    Serial.println("Couldnt start");
-    while (1) yield();
-  }
-  Serial.println("LIS3DH found!");
+//  if (! lis.begin(0x18)) {   // change this to 0x19 for alternative i2c address
+//    Serial.println("Couldnt start");
+//    while (1) yield();
+//  }
+//  Serial.println("LIS3DH found!");
 
   // lis.setRange(LIS3DH_RANGE_4_G);   // 2, 4, 8 or 16 G!
 
-  Serial.print("Range = "); Serial.print(2 << lis.getRange());
-  Serial.println("G");
+  //Serial.print("Range = "); Serial.print(2 << lis.getRange());
+  //Serial.println("G");
 
   lis.setDataRate(LIS3DH_DATARATE_100_HZ);
 
@@ -59,9 +59,9 @@ void setup() {
   pulseSensor.setThreshold(Threshold);   
 
   // Double-check the "pulseSensor" object was created and "began" seeing a signal. 
-   if (pulseSensor.begin()) {
-    Serial.println("We created a pulseSensor Object !");  //This prints one time at Arduino power-up,  or on Arduino reset.  
-  }
+//   if (pulseSensor.begin()) {
+//    Serial.println("We created a pulseSensor Object !");  //This prints one time at Arduino power-up,  or on Arduino reset.  
+//  }
 }
 
 #ifndef DEBUG
