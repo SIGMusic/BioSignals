@@ -12,6 +12,8 @@
 
 #include <JuceHeader.h>
 
+namespace BioSignals
+{
 /**
  From the juce tutorial
  */
@@ -54,3 +56,5 @@ private:
     const int tableSize;
     float currentIndex = 0.0f, tableDelta = 0.0f;
 };
+
+} // namespace BioSignals

@@ -11,6 +11,9 @@
 
 #include <JuceHeader.h>
 
+namespace BioSignals
+{
+
 class FrequencyGenerator
 {
 public:
@@ -18,7 +21,7 @@ public:
   virtual double getNextFreq() = 0;
   static inline double midiToFreq(juce::uint8 midi_note)
   {
-    return 440.0 * std::powf(2.0, midi_note / 12.0);
+    return 440.0 * std::powf(2.0, (midi_note - 69) / 12.0);
   }
 };
 
@@ -31,7 +34,8 @@ public:
   
   virtual double getNextFreq() override
   {
-    return midiToFreq(sequence_[++currIdx_] % sequence_.size());
+    juce::uint8 new_note = sequence_[++currIdx_ % sequence_.size()];
+    return midiToFreq(new_note);
   }
 private:
   juce::Array<juce::uint8> sequence_;
@@ -41,7 +45,11 @@ private:
 class Sequencer : public juce::AudioSource
 {
 public:
+  Sequencer() : Sequencer(nullptr) { /* nothing */ }
   Sequencer(FrequencyGenerator* fg, double tempo = 60.0);
+  Sequencer(Sequencer& other);
+  Sequencer& operator=(Sequencer& other);
+  ~Sequencer() = default;
 
   /*
   *  Set the tempo of this Sequencer.
@@ -50,6 +58,8 @@ public:
   *                        e.g. 60.0 times per minute
   */
   void setTempo(double notesPerMinute);
+  
+  void setSequence(FrequencyGenerator* fg);
 
   virtual void prepareToPlay(
       int samplesPerBlockExpected, double sampleRate) override;
@@ -60,7 +70,7 @@ public:
       const juce::AudioSourceChannelInfo &bufferToFill) override;
 
 private:
-  std::unique_ptr<FrequencyGenerator> freqGen_;
+  std::shared_ptr<FrequencyGenerator> freqGen_;
   juce::ToneGeneratorAudioSource synth_;
   int samplesPerBlockExpected_;
   double sampleRate_ = 48000.0 /* default sample rate */;
@@ -68,3 +78,5 @@ private:
   size_t samplesPerNote_;
   size_t currPeriodSamples_;
 };
+
+} // namespace BioSignals

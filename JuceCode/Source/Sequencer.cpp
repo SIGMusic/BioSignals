@@ -10,8 +10,32 @@
 
 #include "Sequencer.h"
 
+namespace BioSignals
+{
+
 Sequencer::Sequencer(FrequencyGenerator* fg, double tempo) :
     freqGen_(fg), samplesPerNote_(sampleRate_) { }
+
+Sequencer::Sequencer(Sequencer& other)
+{
+  freqGen_ = other.freqGen_;
+  samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
+  sampleRate_ = other.sampleRate_;
+  samplesPerNote_ = other.samplesPerNote_;
+  currPeriodSamples_ = other.currPeriodSamples_;
+  prepareToPlay(samplesPerBlockExpected_, sampleRate_);
+}
+
+Sequencer& Sequencer::operator=(Sequencer& other)
+{
+  freqGen_ = other.freqGen_;
+  samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
+  sampleRate_ = other.sampleRate_;
+  samplesPerNote_ = other.samplesPerNote_;
+  currPeriodSamples_ = other.currPeriodSamples_;
+  prepareToPlay(samplesPerBlockExpected_, sampleRate_);
+  return *this;
+}
 
 /*
 *  Set the tempo of this Sequencer.
@@ -27,21 +51,30 @@ void Sequencer::setTempo(double notesPerMinute)
   samplesPerNote_ = (size_t) (sampleRate_ / (notesPerMinute / 60.0));
 }
 
+void Sequencer::setSequence(FrequencyGenerator* fg)
+{
+  freqGen_ = std::shared_ptr<FrequencyGenerator>(fg);
+}
+
 void Sequencer::prepareToPlay(
     int samplesPerBlockExpected, double sampleRate)
 {
   samplesPerBlockExpected_ = samplesPerBlockExpected;
   sampleRate_ = sampleRate;
+  synth_.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void Sequencer::releaseResources()
 {
-  // nothing for now
+  synth_.releaseResources();
 }
 
 void Sequencer::getNextAudioBlock(
     const juce::AudioSourceChannelInfo &bufferToFill)
 {
+  if (!freqGen_)
+    return; // not ready yet
+
   for (size_t curr_sample = 0;
        curr_sample < samplesPerBlockExpected_;
        ++curr_sample, ++currPeriodSamples_)
@@ -50,10 +83,14 @@ void Sequencer::getNextAudioBlock(
     if (currPeriodSamples_ > samplesPerNote_)
     {
       currPeriodSamples_ = 0;
-      synth_.setFrequency(freqGen_->getNextFreq());
+      double new_freq = freqGen_->getNextFreq();
+      synth_.setFrequency(new_freq);
+      juce::Logger::getCurrentLogger()->writeToLog(
+          "new frequency: " + std::to_string(new_freq));
     }
-    
-    // fill the buffer here
+
+    synth_.getNextAudioBlock(bufferToFill);
   }
 }
 
+} // namespace BioSignals

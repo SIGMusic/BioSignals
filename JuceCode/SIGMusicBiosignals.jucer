@@ -8,8 +8,6 @@
       <GROUP id="{BEC5C87C-5400-0837-EB0F-05F2076E7172}" name="SynthComponents">
         <FILE id="P1wDY6" name="Sequencer.cpp" compile="1" resource="0" file="Source/Sequencer.cpp"/>
         <FILE id="KSGUKV" name="Sequencer.h" compile="0" resource="0" file="Source/Sequencer.h"/>
-        <FILE id="wKHiHn" name="WavetableOsc.cpp" compile="1" resource="0"
-              file="Source/WavetableOsc.cpp"/>
         <FILE id="RZD1BP" name="WavetableOsc.h" compile="0" resource="0" file="Source/WavetableOsc.h"/>
       </GROUP>
       <GROUP id="{AAAC1126-0EAA-BA60-E86A-559397850EF9}" name="JUCESerial">

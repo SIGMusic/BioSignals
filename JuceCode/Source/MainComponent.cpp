@@ -1,34 +1,43 @@
 #include "MainComponent.h"
 
+// TODO
+// get the sequencer thing working with sliders
+// get the serial data parsing to work
+
 //==============================================================================
 MainComponent::MainComponent()
 {
-    // Make sure you set the size of the component after
-    // you add any child components.
-    setSize (800, 600);
+  // Make sure you set the size of the component after
+  // you add any child components.
+  setSize (800, 600);
 
-    // Some platforms require permissions to open input channels so request that here
-    if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)
-        && ! juce::RuntimePermissions::isGranted (juce::RuntimePermissions::recordAudio))
-    {
-        juce::RuntimePermissions::request (juce::RuntimePermissions::recordAudio,
-                                           [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });
-    }
-    else
-    {
-        // Specify the number of input and output channels that we want to open
-        setAudioChannels (2, 2);
-    }
+  // Some platforms require permissions to open input channels so request that here
+  if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)
+      && ! juce::RuntimePermissions::isGranted (juce::RuntimePermissions::recordAudio))
+  {
+      juce::RuntimePermissions::request (juce::RuntimePermissions::recordAudio,
+                                         [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });
+  }
+  else
+  {
+      // Specify the number of input and output channels that we want to open
+      setAudioChannels (2, 2);
+  }
   
   // GUI stuffs
-  addAndMakeVisible(&levelSlider);
-  levelSlider.setRange(0.0f, 1.0f);
+  addAndMakeVisible(&tempoSlider);
+  tempoSlider.addListener(this);
+  tempoSlider.setRange(0.0f, 1.0f);
+  
   addAndMakeVisible(&freqSlider);
   freqSlider.setRange(20.0f, 12000.0f);
+  freqSlider.addListener(this);
   freqLabel.attachToComponent(&freqSlider, true);
+
   addAndMakeVisible(&qSlider);
   qSlider.setRange(0.01f, 100.0f);
   qLabel.attachToComponent(&qSlider, true);
+  qSlider.addListener(this);
   
   DebugFunction df = [](juce::String a, juce::String b) {
     juce::Logger* logger = juce::Logger::getCurrentLogger();
@@ -83,14 +92,17 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-    // This function will be called when the audio device is started, or when
-    // its settings (i.e. sample rate, block size, etc) are changed.
+  // This function will be called when the audio device is started, or when
+  // its settings (i.e. sample rate, block size, etc) are changed.
 
-    // You can use this function to initialise any resources you might need,
-    // but be careful - it will be called on the audio thread, not the GUI thread.
+  // You can use this function to initialise any resources you might need,
+  // but be careful - it will be called on the audio thread, not the GUI thread.
 
-    // For more details, see the help for AudioProcessor::prepareToPlay()
-  sample_rate = sampleRate;
+  // For more details, see the help for AudioProcessor::prepareToPlay()
+  juce::uint8 nn = 60; // C4
+  sequencer_.setSequence(
+    new BioSignals::FreqSequence({nn+0, nn+2, nn+4, nn+5, nn+7, nn+9, nn+11}));
+  sequencer_.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
   juce::String message;
   message << "Preparing to play audio with ";
@@ -107,22 +119,23 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
     // Right now we are not producing any data, in which case we need to clear the buffer
     // (to prevent the output of random noise)
-  auto level = (float) levelSlider.getValue();
-  auto freq = (float) freqSlider.getValue();
-  auto q = juce::jmax((float) qSlider.getValue(), 0.01f);
-  
-  bp_filter.setCoefficients(
-      juce::IIRCoefficients::makeBandPass(sample_rate, freq, q));
+//  auto level = (float) levelSlider.getValue();
+//  auto freq = (float) freqSlider.getValue();
+//  auto q = juce::jmax((float) qSlider.getValue(), 0.01f);
+//
+//  bp_filter.setCoefficients(
+//      juce::IIRCoefficients::makeBandPass(sample_rate, freq, q));
+//
+//  bufferToFill.clearActiveBufferRegion();
+//  for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel) {
+//    auto* buffer = bufferToFill.buffer->getWritePointer(channel);
+//    for (auto sample = 0; sample < bufferToFill.numSamples; ++sample) {
+//      buffer[sample] = level * (random.nextFloat() * 0.25f - 0.125f); // noise
+//    }
+//    bp_filter.processSamples(buffer, bufferToFill.numSamples); // filter
+//  }
 
-  bufferToFill.clearActiveBufferRegion();
-  for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel) {
-    auto* buffer = bufferToFill.buffer->getWritePointer(channel);
-    for (auto sample = 0; sample < bufferToFill.numSamples; ++sample) {
-      buffer[sample] = level * (random.nextFloat() * 0.25f - 0.125f); // noise
-    }
-    bp_filter.processSamples(buffer, bufferToFill.numSamples); // filter
-  }
-    
+  sequencer_.getNextAudioBlock(bufferToFill);
 }
 
 void MainComponent::releaseResources()
@@ -131,40 +144,52 @@ void MainComponent::releaseResources()
     // restarted due to a setting change.
 
     // For more details, see the help for AudioProcessor::releaseResources()
-    juce::Logger::getCurrentLogger()->writeToLog("Releasing resources");
+  sequencer_.releaseResources();
+  juce::Logger::getCurrentLogger()->writeToLog("Releasing resources");
 }
 
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    // You can add your drawing code here!
+  g.fillAll (getLookAndFeel().findColour (
+     juce::ResizableWindow::backgroundColourId));
 }
 
 void MainComponent::resized()
 {
-  levelSlider.setTopLeftPosition(10, 10);
-  levelSlider.setSize(200, 50);
+  tempoSlider.setTopLeftPosition(10, 10);
+  tempoSlider.setSize(200, 50);
   freqSlider.setTopLeftPosition(10, 60);
   freqSlider.setSize(200, 50);
   qSlider.setTopLeftPosition(10, 110);
   qSlider.setSize(200, 50);
-    // This is called when the MainContentComponent is resized.
-    // If you add any child components, this is where you should
-    // update their positions.
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
-  juce::Logger::getCurrentLogger()->outputDebugString("HERE");
-  if (source == instream.get()) {
+//  juce::Logger::getCurrentLogger()->outputDebugString("HERE");
+  if (source == instream.get()) { // source is the serial input stream
     juce::Logger::getCurrentLogger()->outputDebugString("HERE");
     char* buf = new char[16];
     instream->read(buf, 16);
     long new_val = strtol(buf, nullptr, 10);
-    levelSlider.setValue(
-        juce::jmin((double) new_val / 100.0, levelSlider.getMaximum()));
+    tempoSlider.setValue(
+        juce::jmin((double) new_val / 100.0, tempoSlider.getMaximum()));
+  }
+}
+
+void MainComponent::sliderValueChanged(juce::Slider* slider_source)
+{
+  if (slider_source == &freqSlider)
+  {
+    juce::Logger::getCurrentLogger()->writeToLog("slider 1");
+  }
+  else if (slider_source == &tempoSlider)
+  {
+    juce::Logger::getCurrentLogger()->writeToLog("slider 2");
+  }
+  else if (slider_source == &qSlider)
+  {
+    juce::Logger::getCurrentLogger()->writeToLog("slider 3");
   }
 }
 
