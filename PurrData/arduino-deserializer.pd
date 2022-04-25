@@ -1,70 +1,67 @@
-#N canvas 8 0 1522 810 10;
-#X obj 164 297 osc~ 440;
-#X msg 272 26 devices;
-#X text 131 25 list number of devices;
-#X floatatom 284 260 5 0 255 0 - - -, f 5;
-#X obj 354 292 vsl 15 128 0 255 0 0 empty empty empty 0 -9 0 10 #fcfcfc
-#000000 #000000 0 1;
-#X obj 155 386 *~ 1;
-#X msg 77 330 0;
-#X msg 40 333 1;
-#X obj 168 253 + 50;
-#N canvas 0 0 450 300 (subpatch) 0;
-#X array $array1 100 float 3 black black;
-#A 0 0.151869 0.165258 0.178616 0.191942 0.205233 0.218487 0.231699
-0.244867 0.25799 0.271067 0.284094 0.297069 0.30999 0.322854 0.33566
-0.348405 0.361081 0.373691 0.386232 0.398703 0.411102 0.423426 0.435672
-0.447839 0.459925 0.471924 0.483832 0.495652 0.507382 0.51902 0.530562
-0.542009 0.553356 0.564603 0.575747 0.586777 0.5977 0.608514 0.619217
-0.629807 0.640282 0.650641 0.660881 0.671001 0.680994 0.690857 0.700593
-0.710202 0.719682 0.72903 0.738246 0.747327 0.756272 0.76508 0.773737
-0.782251 0.790623 0.798851 0.806934 0.814869 0.822656 0.830293 0.837779
-0.845107 0.852273 0.859284 0.866138 0.872834 0.87937 0.885747 0.891962
-0.898015 0.903905 0.909617 0.915162 0.920539 0.925749 0.93079 0.935662
-0.940363 0.944893 0.94925 0.95343 0.957426 0.961247 0.964893 0.968364
-0.971658 0.974774 0.977714 0.980475 0.983057 0.985448 0.987656 0.989684
-0.991532 0.993199 0.994685 0.99599 0.997114;
-#X coords 0 1 100 -1 200 140 1;
-#X restore 430 308 graph;
-#X obj 212 349 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
-#000000 0 1;
-#X obj 142 441 tabwrite~ $array1;
-#X obj 241 378 metro 200;
-#X obj 271 55 comport 0 9600;
-#X text 828 64 Sound Simulator : Arduino To Pure Data (Tutorial) (https://www.youtube.com/watch?v=eVW0FD9g_Sk)
+#N canvas -1 9 1523 811 10;
+#X msg 288 119 devices;
+#X text 147 118 list number of devices;
+#X obj 287 148 comport 0 9600;
+#X text 844 157 Sound Simulator : Arduino To Pure Data (Tutorial) (https://www.youtube.com/watch?v=eVW0FD9g_Sk)
 ;
-#X obj 284 94 sel 13 10;
-#X obj 279 148 zl group 100;
-#X obj 279 170 iem_alisttosym;
-#X obj 278 196 fromsymbol;
-#X floatatom 280 218 5 0 0 0 - - -, f 5;
-#X text 328 4 replace number with port number;
-#X msg 330 26 open 3;
-#X obj 169 100 print;
-#X msg 397 25 close;
-#X text 378 56 0 to 1023;
-#X text 370 94 if it matches a 10 \, then sends a bang \, else send
-the float itself;
-#X text 376 150 stores floats that it receives. if it receives a bang
+#X obj 238 251 iem_alisttosym;
+#X obj 238 271 fromsymbol;
+#X text 406 98 replace number with port number;
+#X msg 346 119 open 3;
+#X msg 413 118 close;
+#X text 394 149 0 to 1023;
+#X text 412 215 stores floats that it receives. if it receives a bang
 \, outputs the list;
-#X text 386 175 converts a list of ASCII characters to a symbol;
-#X text 364 196 conversts symbol to the message itself??? like "symbol
-asdf" to "asdf";
-#X connect 0 0 5 0;
-#X connect 1 0 13 0;
-#X connect 3 0 4 0;
-#X connect 4 0 8 0;
-#X connect 5 0 11 0;
-#X connect 6 0 5 1;
-#X connect 7 0 5 1;
-#X connect 8 0 0 0;
-#X connect 10 0 12 0;
-#X connect 12 0 11 0;
-#X connect 13 0 15 0;
-#X connect 15 0 16 0;
-#X connect 15 2 16 0;
-#X connect 16 0 17 0;
-#X connect 17 0 18 0;
-#X connect 18 0 19 0;
-#X connect 21 0 13 0;
-#X connect 23 0 13 0;
+#X text 438 260 converts a list of ASCII characters to a symbol;
+#X obj 238 231 zl group 100;
+#X text 392 186 ASCII: 32=space 13=CR 10=LF;
+#X obj 300 187 sel 13 10;
+#X text 128 292 split a list;
+#X text 416 281 converts symbol to the message itself??? like "symbol
+asdf" to "asdf" or to a list or sth?;
+#X floatatom 190 344 5 0 0 0 - - -, f 5;
+#X floatatom 242 344 5 0 0 0 - - -, f 5;
+#X obj 236 292 unpack f f f f f f;
+#X floatatom 288 383 5 0 0 0 - - -, f 5;
+#X floatatom 371 378 5 0 0 0 - - -, f 5;
+#X floatatom 434 377 5 0 0 0 - - -, f 5;
+#X floatatom 487 377 5 0 0 0 - - -, f 5;
+#X obj 139 385 outlet;
+#X obj 218 385 outlet;
+#X obj 289 400 outlet;
+#X obj 360 397 outlet;
+#X obj 434 401 outlet;
+#X obj 487 401 outlet;
+#X obj 344 74 list;
+#X obj 338 26 inlet;
+#X text 501 34 inlet indicating port number;
+#X msg 1127 373 devices;
+#X obj 1126 402 comport 0 9600;
+#X obj 405 51 bng 18 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
+#X connect 0 0 2 0;
+#X connect 2 0 14 0;
+#X connect 4 0 5 0;
+#X connect 5 0 19 0;
+#X connect 7 0 2 0;
+#X connect 8 0 2 0;
+#X connect 12 0 4 0;
+#X connect 14 0 12 0;
+#X connect 14 2 12 0;
+#X connect 17 0 24 0;
+#X connect 18 0 25 0;
+#X connect 19 0 17 0;
+#X connect 19 1 18 0;
+#X connect 19 2 20 0;
+#X connect 19 3 21 0;
+#X connect 19 4 22 0;
+#X connect 19 5 23 0;
+#X connect 20 0 26 0;
+#X connect 21 0 27 0;
+#X connect 22 0 28 0;
+#X connect 23 0 29 0;
+#X connect 30 0 7 0;
+#X connect 31 0 30 1;
+#X connect 31 0 35 0;
+#X connect 33 0 34 0;
+#X connect 35 0 30 0;
