@@ -2,9 +2,7 @@
 
 // TODO
 // get the serial data parsing to work
-// create sequence ui component
 // create sequence type dropdown
-// link everything together with the UI
 
 //==============================================================================
 MainComponent::MainComponent() : synth_wavetable_(*wavetable_),
@@ -25,6 +23,13 @@ MainComponent::MainComponent() : synth_wavetable_(*wavetable_),
   {
       // Specify the number of input and output channels that we want to open
       setAudioChannels (2, 2);
+  }
+  
+  addAndMakeVisible(&sequence_editor_);
+  
+  for (auto& entry : sequence_editor_.sequence_entries_)
+  {
+    entry->addChangeListener(this);
   }
   
   // GUI stuffs
@@ -101,9 +106,17 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
   low_pass_filter_ch2.setCoefficients(
       juce::IIRCoefficients::makeLowPass(sampleRate, 1000.0f)
   );
-  juce::uint8 nn = 60; // C4
   sequencer_.setSequence(
-    new BioSignals::FreqSequence({nn+0, nn+2, nn+4, nn+5, nn+7, nn+9, nn+11, nn+12}));
+    new BioSignals::FreqSequence((std::vector<juce::uint8>) {
+      60,
+      62,
+      64,
+      65,
+      67,
+      69,
+      71,
+      72
+    }));
   sequencer_.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
   juce::String message;
@@ -145,17 +158,18 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::resized()
 {
-  tempoSlider.setTopLeftPosition(10, 10);
-  tempoSlider.setSize(200, 50);
-  freqSlider.setTopLeftPosition(10, 60);
-  freqSlider.setSize(200, 50);
-  volumeSlider.setTopLeftPosition(10, 110);
-  volumeSlider.setSize(200, 50);
+  auto area = getLocalBounds();
+  auto slider_width = 100;
+  auto sequence_editor_height = area.getHeight() - 200;
+  sequence_editor_.setBounds(area.removeFromTop(sequence_editor_height));
+
+  tempoSlider.setBounds(area.removeFromLeft(slider_width));
+  freqSlider.setBounds(area.removeFromLeft(slider_width));
+  volumeSlider.setBounds(area.removeFromLeft(slider_width));
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
   if (source == instream.get()) { // source is the serial input stream
-    juce::Logger::getCurrentLogger()->outputDebugString("HERE");
     char buf[1024];
     int num_bytes_read = instream->read(buf, 1024);
     if (num_bytes_read < 0)
@@ -175,6 +189,10 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
 
     tempoSlider.setValue(
         juce::jmin((double) new_val / 100.0, tempoSlider.getMaximum()));
+  } else { // from sequencer
+//    juce::Logger::getCurrentLogger()->writeToLog("CALLBACK");
+    sequencer_.setSequence(
+      new BioSignals::FreqSequence(sequence_editor_.getSequence()));
   }
 }
 

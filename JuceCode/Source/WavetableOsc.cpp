@@ -18,18 +18,18 @@ WavetableOscillator::WavetableOscillator (
         : wavetable (wavetableToUse),
           tableSize (wavetable.getNumSamples() - 1)
 {
-  juce::Logger::getCurrentLogger()->writeToLog("Num samples: " + std::to_string(tableSize));
+//  juce::Logger::getCurrentLogger()->writeToLog("Num samples: " + std::to_string(tableSize));
 }
 
 void WavetableOscillator::setAmplitude(float amp)
 {
-  juce::Logger::getCurrentLogger()->writeToLog("Amp: " + std::to_string(amp));
+//  juce::Logger::getCurrentLogger()->writeToLog("Amp: " + std::to_string(amp));
   amp_ = amp;
 }
 
 void WavetableOscillator::setFrequency(float frequency)
 {
-  juce::Logger::getCurrentLogger()->writeToLog("Freq: " + std::to_string(frequency));
+//  juce::Logger::getCurrentLogger()->writeToLog("Freq: " + std::to_string(frequency));
   frequency_ = frequency;
   float tableSizeOverSampleRate = (float) tableSize / sampleRate_;
   tableDelta = frequency_ * tableSizeOverSampleRate;

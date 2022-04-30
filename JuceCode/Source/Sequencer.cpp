@@ -18,26 +18,26 @@ Sequencer::Sequencer(BioSignals::WavetableOscillator& tgas,
                      double tempo) :
     freqGen_(fg), synth_(tgas), samplesPerNote_(sampleRate_) { }
 
-Sequencer::Sequencer(Sequencer& other) : synth_(other.synth_)
-{
-  freqGen_ = other.freqGen_;
-  samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
-  sampleRate_ = other.sampleRate_;
-  samplesPerNote_ = other.samplesPerNote_;
-  currPeriodSamples_ = other.currPeriodSamples_;
-  prepareToPlay(samplesPerBlockExpected_, sampleRate_);
-}
+//Sequencer::Sequencer(Sequencer& other) : synth_(other.synth_)
+//{
+//  freqGen_ = other.freqGen_;
+//  samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
+//  sampleRate_ = other.sampleRate_;
+//  samplesPerNote_ = other.samplesPerNote_;
+//  currPeriodSamples_ = other.currPeriodSamples_;
+//  prepareToPlay(samplesPerBlockExpected_, sampleRate_);
+//}
 
-Sequencer& Sequencer::operator=(Sequencer& other)
-{
-  freqGen_ = other.freqGen_;
-  samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
-  sampleRate_ = other.sampleRate_;
-  samplesPerNote_ = other.samplesPerNote_;
-  currPeriodSamples_ = other.currPeriodSamples_;
-  prepareToPlay(samplesPerBlockExpected_, sampleRate_);
-  return *this;
-}
+//Sequencer& Sequencer::operator=(Sequencer& other)
+//{
+//  freqGen_ = other.freqGen_;
+//  samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
+//  sampleRate_ = other.sampleRate_;
+//  samplesPerNote_ = other.samplesPerNote_;
+//  currPeriodSamples_ = other.currPeriodSamples_;
+//  prepareToPlay(samplesPerBlockExpected_, sampleRate_);
+//  return *this;
+//}
 
 /*
 *  Set the tempo of this Sequencer.
@@ -55,7 +55,7 @@ void Sequencer::setTempo(double notesPerMinute)
 
 void Sequencer::setSequence(FrequencyGenerator* fg)
 {
-  freqGen_ = std::shared_ptr<FrequencyGenerator>(fg);
+  freqGen_ = std::unique_ptr<FrequencyGenerator>(fg);
 }
 
 void Sequencer::prepareToPlay(
@@ -84,8 +84,8 @@ void Sequencer::getNextAudioBlock(
     currPeriodSamples_ = 0;
     double new_freq = freqGen_->getNextFreq();
     synth_.setFrequency(new_freq);
-      juce::Logger::getCurrentLogger()->writeToLog(
-          "new frequency: " + std::to_string(new_freq));
+//      juce::Logger::getCurrentLogger()->writeToLog(
+//          "new frequency: " + std::to_string(new_freq));
   }
 
   synth_.getNextAudioBlock(bufferToFill);

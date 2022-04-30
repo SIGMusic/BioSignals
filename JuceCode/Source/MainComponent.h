@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "JUCESerial/juce_serialport.h"
+#include "SequenceEditor.h"
 #include "Sequencer.h"
 #include "WavetableOsc.h"
 
@@ -41,6 +42,8 @@ private:
   juce::IIRFilter low_pass_filter_ch1;
   juce::IIRFilter low_pass_filter_ch2;
 
+  BioSignals::SequenceEditor sequence_editor_;
+  
   juce::Slider tempoSlider{juce::Slider::SliderStyle::LinearHorizontal,
                            juce::Slider::TextEntryBoxPosition::TextBoxBelow};
   juce::Slider freqSlider{juce::Slider::SliderStyle::LinearHorizontal,
@@ -50,7 +53,7 @@ private:
                             juce::Slider::TextEntryBoxPosition::TextBoxBelow};
 
   juce::Label volumeLabel;
-  
+
   float volume = 0.0f;
   double sample_rate = 48000.0;
 

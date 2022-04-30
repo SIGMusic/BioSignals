@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="dnDa9y" name="SIGMusicBiosignals" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              defines="JUCE_MODAL_LOOPS_PERMITTED=1">
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1">
   <MAINGROUP id="Hk25AW" name="SIGMusicBiosignals">
     <GROUP id="{B89388B0-8E05-AAF1-10D2-12ECB4818E2C}" name="Source">
       <GROUP id="{BEC5C87C-5400-0837-EB0F-05F2076E7172}" name="SynthComponents">
@@ -26,6 +25,10 @@
       <FILE id="Ww4Kgx" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="CUWvji" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
+      <FILE id="dNBuk0" name="SequenceEditor.h" compile="0" resource="0"
+            file="Source/SequenceEditor.h"/>
+      <FILE id="vnm9qO" name="SequenceEditor.cpp" compile="1" resource="0"
+            file="Source/SequenceEditor.cpp"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
