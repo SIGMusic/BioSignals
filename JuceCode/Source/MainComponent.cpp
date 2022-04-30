@@ -1,11 +1,14 @@
 #include "MainComponent.h"
 
 // TODO
-// get the sequencer thing working with sliders
 // get the serial data parsing to work
+// create sequence ui component
+// create sequence type dropdown
+// link everything together with the UI
 
 //==============================================================================
-MainComponent::MainComponent()
+MainComponent::MainComponent() : synth_wavetable_(*wavetable_),
+                                 sequencer_(synth_wavetable_)
 {
   // Make sure you set the size of the component after
   // you add any child components.
@@ -27,17 +30,17 @@ MainComponent::MainComponent()
   // GUI stuffs
   addAndMakeVisible(&tempoSlider);
   tempoSlider.addListener(this);
-  tempoSlider.setRange(0.0f, 1.0f);
+  tempoSlider.setRange(10.0f, 600.0f);
   
   addAndMakeVisible(&freqSlider);
   freqSlider.setRange(20.0f, 12000.0f);
   freqSlider.addListener(this);
   freqLabel.attachToComponent(&freqSlider, true);
 
-  addAndMakeVisible(&qSlider);
-  qSlider.setRange(0.01f, 100.0f);
-  qLabel.attachToComponent(&qSlider, true);
-  qSlider.addListener(this);
+  addAndMakeVisible(&volumeSlider);
+  volumeSlider.setRange(0.0f, 1.0f);
+  volumeLabel.attachToComponent(&volumeSlider, true);
+  volumeSlider.addListener(this);
   
   DebugFunction df = [](juce::String a, juce::String b) {
     juce::Logger* logger = juce::Logger::getCurrentLogger();
@@ -58,9 +61,10 @@ MainComponent::MainComponent()
   }
   
   juce::String selection = getPortBlockingSerialDialog(portlist);
+  juce::Logger::getCurrentLogger()->writeToLog("Selection: " + selection);
 
   sp = std::unique_ptr<SerialPort>(new SerialPort(
-    portlist[selection],
+    "/dev/cu." + selection,
     SerialPortConfig(9600,
                      8,
                      SerialPortConfig::SERIALPORT_PARITY_NONE,
@@ -76,7 +80,7 @@ MainComponent::MainComponent()
 
     //ask to be notified whenever any character is received
     instream->addChangeListener(this);
-    instream->setNotify(SerialPortInputStream::NOTIFY_ON_CHAR);
+    instream->setNotify(SerialPortInputStream::NOTIFY_ON_CHAR, '\n');
     juce::Logger::getCurrentLogger()->writeToLog("opened serial port");
   } else {
     juce::Logger::getCurrentLogger()->writeToLog("NO SERIAL PORT FOUND!!!");
@@ -85,23 +89,21 @@ MainComponent::MainComponent()
 
 MainComponent::~MainComponent()
 {
-    // This shuts down the audio device and clears the audio source.
     shutdownAudio();
 }
 
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-  // This function will be called when the audio device is started, or when
-  // its settings (i.e. sample rate, block size, etc) are changed.
-
-  // You can use this function to initialise any resources you might need,
-  // but be careful - it will be called on the audio thread, not the GUI thread.
-
-  // For more details, see the help for AudioProcessor::prepareToPlay()
+  low_pass_filter_ch1.setCoefficients(
+      juce::IIRCoefficients::makeLowPass(sampleRate, 1000.0f)
+  );
+  low_pass_filter_ch2.setCoefficients(
+      juce::IIRCoefficients::makeLowPass(sampleRate, 1000.0f)
+  );
   juce::uint8 nn = 60; // C4
   sequencer_.setSequence(
-    new BioSignals::FreqSequence({nn+0, nn+2, nn+4, nn+5, nn+7, nn+9, nn+11}));
+    new BioSignals::FreqSequence({nn+0, nn+2, nn+4, nn+5, nn+7, nn+9, nn+11, nn+12}));
   sequencer_.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
   juce::String message;
@@ -113,37 +115,23 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    // Your audio-processing code goes here!
-
-    // For more details, see the help for AudioProcessor::getNextAudioBlock()
-
-    // Right now we are not producing any data, in which case we need to clear the buffer
-    // (to prevent the output of random noise)
-//  auto level = (float) levelSlider.getValue();
-//  auto freq = (float) freqSlider.getValue();
-//  auto q = juce::jmax((float) qSlider.getValue(), 0.01f);
-//
-//  bp_filter.setCoefficients(
-//      juce::IIRCoefficients::makeBandPass(sample_rate, freq, q));
-//
-//  bufferToFill.clearActiveBufferRegion();
-//  for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel) {
-//    auto* buffer = bufferToFill.buffer->getWritePointer(channel);
-//    for (auto sample = 0; sample < bufferToFill.numSamples; ++sample) {
-//      buffer[sample] = level * (random.nextFloat() * 0.25f - 0.125f); // noise
-//    }
-//    bp_filter.processSamples(buffer, bufferToFill.numSamples); // filter
-//  }
-
   sequencer_.getNextAudioBlock(bufferToFill);
+
+  auto* ch1_buffer = bufferToFill.buffer->getWritePointer(0);
+  auto* ch2_buffer = bufferToFill.buffer->getWritePointer(1);
+  
+  for (unsigned int idx = 0; idx < bufferToFill.numSamples; ++idx)
+  {
+    ch1_buffer[idx] *= volume;
+    ch2_buffer[idx] *= volume;
+  }
+
+  low_pass_filter_ch1.processSamples(ch1_buffer, bufferToFill.numSamples);
+  low_pass_filter_ch2.processSamples(ch2_buffer, bufferToFill.numSamples);
 }
 
 void MainComponent::releaseResources()
 {
-    // This will be called when the audio device stops, or when it is being
-    // restarted due to a setting change.
-
-    // For more details, see the help for AudioProcessor::releaseResources()
   sequencer_.releaseResources();
   juce::Logger::getCurrentLogger()->writeToLog("Releasing resources");
 }
@@ -161,17 +149,30 @@ void MainComponent::resized()
   tempoSlider.setSize(200, 50);
   freqSlider.setTopLeftPosition(10, 60);
   freqSlider.setSize(200, 50);
-  qSlider.setTopLeftPosition(10, 110);
-  qSlider.setSize(200, 50);
+  volumeSlider.setTopLeftPosition(10, 110);
+  volumeSlider.setSize(200, 50);
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
-//  juce::Logger::getCurrentLogger()->outputDebugString("HERE");
   if (source == instream.get()) { // source is the serial input stream
     juce::Logger::getCurrentLogger()->outputDebugString("HERE");
-    char* buf = new char[16];
-    instream->read(buf, 16);
-    long new_val = strtol(buf, nullptr, 10);
+    char buf[1024];
+    int num_bytes_read = instream->read(buf, 1024);
+    if (num_bytes_read < 0)
+    {
+      juce::Logger::getCurrentLogger()->outputDebugString("Could not read buffer");
+      return; // error
+    }
+    buf[num_bytes_read] = '\0'; // TODO check
+    char sensor_num_str[3];
+    sensor_num_str[2] = '\0';
+    strncpy(sensor_num_str, buf, 2);
+    juce::uint8 sensor_num = (juce::uint8) strtol(sensor_num_str, nullptr, 16);
+    juce::Logger::getCurrentLogger()->outputDebugString("sensor_num: " + std::to_string(sensor_num));
+
+    float new_val = strtof(buf + 3, NULL);
+    juce::Logger::getCurrentLogger()->outputDebugString("new value: " + std::to_string(new_val));
+
     tempoSlider.setValue(
         juce::jmin((double) new_val / 100.0, tempoSlider.getMaximum()));
   }
@@ -181,15 +182,20 @@ void MainComponent::sliderValueChanged(juce::Slider* slider_source)
 {
   if (slider_source == &freqSlider)
   {
-    juce::Logger::getCurrentLogger()->writeToLog("slider 1");
+    low_pass_filter_ch1.setCoefficients(
+        juce::IIRCoefficients::makeLowPass(sample_rate, freqSlider.getValue())
+    );
+    low_pass_filter_ch2.setCoefficients(
+        juce::IIRCoefficients::makeLowPass(sample_rate, freqSlider.getValue())
+    );
   }
   else if (slider_source == &tempoSlider)
   {
-    juce::Logger::getCurrentLogger()->writeToLog("slider 2");
+    sequencer_.setTempo(tempoSlider.getValue());
   }
-  else if (slider_source == &qSlider)
+  else if (slider_source == &volumeSlider)
   {
-    juce::Logger::getCurrentLogger()->writeToLog("slider 3");
+    volume = volumeSlider.getValue();
   }
 }
 
@@ -217,7 +223,7 @@ juce::String MainComponent::getPortBlockingSerialDialog(
   juce::String choice;
 
   dropdown.onChange = [&](void) {
-    choice = ports[dropdown.getSelectedId()];
+    choice = ports[dropdown.getSelectedId() - 1];
   };
   dropdown.setSelectedId(1);
   

@@ -13,10 +13,12 @@
 namespace BioSignals
 {
 
-Sequencer::Sequencer(FrequencyGenerator* fg, double tempo) :
-    freqGen_(fg), samplesPerNote_(sampleRate_) { }
+Sequencer::Sequencer(BioSignals::WavetableOscillator& tgas,
+                     FrequencyGenerator* fg,
+                     double tempo) :
+    freqGen_(fg), synth_(tgas), samplesPerNote_(sampleRate_) { }
 
-Sequencer::Sequencer(Sequencer& other)
+Sequencer::Sequencer(Sequencer& other) : synth_(other.synth_)
 {
   freqGen_ = other.freqGen_;
   samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
@@ -75,22 +77,20 @@ void Sequencer::getNextAudioBlock(
   if (!freqGen_)
     return; // not ready yet
 
-  for (size_t curr_sample = 0;
-       curr_sample < samplesPerBlockExpected_;
-       ++curr_sample, ++currPeriodSamples_)
+
+  // if past threshold, then change frequency of synthesizer
+  if (currPeriodSamples_ > samplesPerNote_)
   {
-    // if past threshold, then change frequency of synthesizer
-    if (currPeriodSamples_ > samplesPerNote_)
-    {
-      currPeriodSamples_ = 0;
-      double new_freq = freqGen_->getNextFreq();
-      synth_.setFrequency(new_freq);
+    currPeriodSamples_ = 0;
+    double new_freq = freqGen_->getNextFreq();
+    synth_.setFrequency(new_freq);
       juce::Logger::getCurrentLogger()->writeToLog(
           "new frequency: " + std::to_string(new_freq));
-    }
-
-    synth_.getNextAudioBlock(bufferToFill);
   }
+
+  synth_.getNextAudioBlock(bufferToFill);
+  
+  currPeriodSamples_ += bufferToFill.numSamples;
 }
 
 } // namespace BioSignals

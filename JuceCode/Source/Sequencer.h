@@ -10,6 +10,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "WavetableOsc.h"
 
 namespace BioSignals
 {
@@ -45,8 +46,11 @@ private:
 class Sequencer : public juce::AudioSource
 {
 public:
-  Sequencer() : Sequencer(nullptr) { /* nothing */ }
-  Sequencer(FrequencyGenerator* fg, double tempo = 60.0);
+  Sequencer(BioSignals::WavetableOscillator& tgas) :
+          Sequencer(tgas, nullptr) { /* nothing */ }
+  Sequencer(BioSignals::WavetableOscillator& tgas,
+            FrequencyGenerator* fg,
+            double tempo = 60.0);
   Sequencer(Sequencer& other);
   Sequencer& operator=(Sequencer& other);
   ~Sequencer() = default;
@@ -71,7 +75,7 @@ public:
 
 private:
   std::shared_ptr<FrequencyGenerator> freqGen_;
-  juce::ToneGeneratorAudioSource synth_;
+  BioSignals::WavetableOscillator& synth_;
   int samplesPerBlockExpected_;
   double sampleRate_ = 48000.0 /* default sample rate */;
 

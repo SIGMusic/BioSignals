@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "JUCESerial/juce_serialport.h"
 #include "Sequencer.h"
+#include "WavetableOsc.h"
 
 //==============================================================================
 /*
@@ -33,17 +34,24 @@ public:
 private:
   juce::String getPortBlockingSerialDialog(const juce::StringPairArray& portlist);
   //==============================================================================
+  std::unique_ptr<juce::AudioSampleBuffer> wavetable_ =
+          BioSignals::WavetableOscillator::createWavetableBLITSaw(8192, 27);
+  BioSignals::WavetableOscillator synth_wavetable_;
   BioSignals::Sequencer sequencer_;
+  juce::IIRFilter low_pass_filter_ch1;
+  juce::IIRFilter low_pass_filter_ch2;
 
   juce::Slider tempoSlider{juce::Slider::SliderStyle::LinearHorizontal,
                            juce::Slider::TextEntryBoxPosition::TextBoxBelow};
   juce::Slider freqSlider{juce::Slider::SliderStyle::LinearHorizontal,
                           juce::Slider::TextEntryBoxPosition::TextBoxBelow};
   juce::Label freqLabel;
-  juce::Slider qSlider{juce::Slider::SliderStyle::LinearHorizontal,
-                          juce::Slider::TextEntryBoxPosition::TextBoxBelow};
+  juce::Slider volumeSlider{juce::Slider::SliderStyle::LinearHorizontal,
+                            juce::Slider::TextEntryBoxPosition::TextBoxBelow};
 
-  juce::Label qLabel;
+  juce::Label volumeLabel;
+  
+  float volume = 0.0f;
   double sample_rate = 48000.0;
 
   std::unique_ptr<SerialPort> sp;
