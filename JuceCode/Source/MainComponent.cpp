@@ -4,6 +4,19 @@
 // get the serial data parsing to work
 // create sequence type dropdown
 
+enum SensorNums
+{
+  TEMP1 = 0x01,
+  TEMP2 = 0x02,
+  PULSE = 0x03,
+  ACCLX = 0x04,
+  ACCLY = 0x05,
+  ACCLZ = 0x06,
+};
+
+const static float MIN_TEMP = 20.0f;
+const static float MAX_TEMP = 27.0f;
+
 //==============================================================================
 MainComponent::MainComponent() : synth_wavetable_(*wavetable_),
                                  sequencer_(synth_wavetable_)
@@ -107,7 +120,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
       juce::IIRCoefficients::makeLowPass(sampleRate, 1000.0f)
   );
   sequencer_.setSequence(
-    new BioSignals::FreqSequence((std::vector<juce::uint8>) {
+    new BioSignals::FreqRandom((std::vector<juce::uint8>) {
       60,
       62,
       64,
@@ -170,29 +183,32 @@ void MainComponent::resized()
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
   if (source == instream.get()) { // source is the serial input stream
-    char buf[1024];
-    int num_bytes_read = instream->read(buf, 1024);
-    if (num_bytes_read < 0)
+    juce::String line = instream->readNextLine();
+    juce::Logger::getCurrentLogger()->writeToLog(line);
+    auto* buf = line.getCharPointer().getAddress();
+    buf[line.length()] = '\0';
+    juce::uint8 sensor_num = buf[0] - 48;
+//    juce::Logger::getCurrentLogger()->outputDebugString("sensor_num: " + std::to_string(sensor_num));
+
+    float new_val = strtof(buf + 1, NULL);
+//    juce::Logger::getCurrentLogger()->outputDebugString("new value: " + std::to_string(new_val));
+    
+    if (sensor_num == TEMP2)
     {
-      juce::Logger::getCurrentLogger()->outputDebugString("Could not read buffer");
-      return; // error
+      freqSlider.setValue(
+          ((new_val - MIN_TEMP) / (MAX_TEMP - MIN_TEMP)) *
+           (freqSlider.getMaximum() - freqSlider.getMinimum()) +
+          freqSlider.getMinimum());
     }
-    buf[num_bytes_read] = '\0'; // TODO check
-    char sensor_num_str[3];
-    sensor_num_str[2] = '\0';
-    strncpy(sensor_num_str, buf, 2);
-    juce::uint8 sensor_num = (juce::uint8) strtol(sensor_num_str, nullptr, 16);
-    juce::Logger::getCurrentLogger()->outputDebugString("sensor_num: " + std::to_string(sensor_num));
-
-    float new_val = strtof(buf + 3, NULL);
-    juce::Logger::getCurrentLogger()->outputDebugString("new value: " + std::to_string(new_val));
-
-    tempoSlider.setValue(
-        juce::jmin((double) new_val / 100.0, tempoSlider.getMaximum()));
+    else if (sensor_num == PULSE)
+    {
+//      juce::Logger::getCurrentLogger()->outputDebugString("PULSE");
+      tempoSlider.setValue(new_val);
+    }
   } else { // from sequencer
 //    juce::Logger::getCurrentLogger()->writeToLog("CALLBACK");
     sequencer_.setSequence(
-      new BioSignals::FreqSequence(sequence_editor_.getSequence()));
+      new BioSignals::FreqRandom(sequence_editor_.getSequence()));
   }
 }
 

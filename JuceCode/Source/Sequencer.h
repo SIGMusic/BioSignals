@@ -48,9 +48,43 @@ public:
   
   virtual double getNextFreq() override
   {
-    return sequence_[++currIdx_ % sequence_.size()];
+    return sequence_[++currIdx_ %= sequence_.size()];
   }
 private:
+  std::vector<float> sequence_;
+  juce::uint8 currIdx_ = 0;
+};
+
+class FreqRandom : public FrequencyGenerator
+{
+public:
+  FreqRandom(const std::vector<juce::uint8>& sequence)
+  {
+    sequence_.resize(sequence.size());
+    for (unsigned int idx = 0; idx < sequence.size(); ++idx)
+    {
+      sequence_[idx] = midiToFreq(sequence[idx]);
+    }
+  };
+  FreqRandom(const std::vector<float>& sequence) :
+      sequence_(sequence) { };
+  ~FreqRandom() = default;
+  
+  virtual double getNextFreq() override
+  {
+    float rand = juce::Random::getSystemRandom().nextFloat();
+    if (rand < threshold)
+    {
+      return sequence_[++currIdx_ %= sequence_.size()];
+    }
+    else
+    {
+      currIdx_ = juce::Random::getSystemRandom().nextInt() % sequence_.size();
+      return sequence_[currIdx_];
+    }
+  }
+private:
+  float threshold = 0.5f;
   std::vector<float> sequence_;
   juce::uint8 currIdx_ = 0;
 };

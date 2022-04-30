@@ -18,27 +18,6 @@ Sequencer::Sequencer(BioSignals::WavetableOscillator& tgas,
                      double tempo) :
     freqGen_(fg), synth_(tgas), samplesPerNote_(sampleRate_) { }
 
-//Sequencer::Sequencer(Sequencer& other) : synth_(other.synth_)
-//{
-//  freqGen_ = other.freqGen_;
-//  samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
-//  sampleRate_ = other.sampleRate_;
-//  samplesPerNote_ = other.samplesPerNote_;
-//  currPeriodSamples_ = other.currPeriodSamples_;
-//  prepareToPlay(samplesPerBlockExpected_, sampleRate_);
-//}
-
-//Sequencer& Sequencer::operator=(Sequencer& other)
-//{
-//  freqGen_ = other.freqGen_;
-//  samplesPerBlockExpected_ = other.samplesPerBlockExpected_;
-//  sampleRate_ = other.sampleRate_;
-//  samplesPerNote_ = other.samplesPerNote_;
-//  currPeriodSamples_ = other.currPeriodSamples_;
-//  prepareToPlay(samplesPerBlockExpected_, sampleRate_);
-//  return *this;
-//}
-
 /*
 *  Set the tempo of this Sequencer.
 *
