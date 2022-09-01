@@ -14,7 +14,8 @@
 
 class MainComponent  : public juce::AudioAppComponent,
                        public juce::ChangeListener,
-                       public juce::Slider::Listener
+                       public juce::Slider::Listener,
+                       public juce::ComboBox::Listener
 {
 public:
   //==============================================================================
@@ -27,6 +28,7 @@ public:
   void releaseResources() override;
   void changeListenerCallback(juce::ChangeBroadcaster* source) override;
   void sliderValueChanged(juce::Slider* slider_source) override;
+  void comboBoxChanged(juce::ComboBox* box_source) override;
 
   //==============================================================================
   void paint (juce::Graphics& g) override;
@@ -34,6 +36,7 @@ public:
 
 private:
   juce::String getPortBlockingSerialDialog(const juce::StringPairArray& portlist);
+  void updateSequence(unsigned int new_seq_idx);
   //==============================================================================
   std::unique_ptr<juce::AudioSampleBuffer> wavetable_ =
           BioSignals::WavetableOscillator::createWavetableBLITSaw(8192, 27);
@@ -51,6 +54,8 @@ private:
   juce::Label freqLabel;
   juce::Slider volumeSlider{juce::Slider::SliderStyle::LinearHorizontal,
                             juce::Slider::TextEntryBoxPosition::TextBoxBelow};
+
+  juce::ComboBox seqTypeDropdown;
 
   juce::Label volumeLabel;
 

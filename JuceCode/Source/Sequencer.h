@@ -16,6 +16,13 @@
 namespace BioSignals
 {
 
+enum GeneratorType {
+  SEQUENCE,
+  RANDOM
+};
+
+const extern std::pair<GeneratorType, const char*> generator_types[2];
+
 class FrequencyGenerator
 {
 public:
@@ -88,6 +95,9 @@ private:
   std::vector<float> sequence_;
   juce::uint8 currIdx_ = 0;
 };
+
+FrequencyGenerator* constructFreqGenerator(GeneratorType gen_type,
+                                           const std::vector<float>& sequence);
 
 class Sequencer : public juce::AudioSource
 {

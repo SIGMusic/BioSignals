@@ -13,6 +13,24 @@
 namespace BioSignals
 {
 
+const extern std::pair<GeneratorType, const char*> generator_types[2] = {{RANDOM, "Random"}, {SEQUENCE, "Sequence"}};
+
+
+FrequencyGenerator* constructFreqGenerator(GeneratorType gen_type,
+                                           const std::vector<float>& sequence)
+{
+  switch (gen_type) {
+    case SEQUENCE:
+      return new FreqSequence(sequence);
+      break;
+    case RANDOM:
+      return new FreqRandom(sequence);
+      break;
+    default:
+      return nullptr;
+  }
+}
+
 Sequencer::Sequencer(BioSignals::WavetableOscillator& tgas,
                      FrequencyGenerator* fg,
                      double tempo) :

@@ -60,6 +60,14 @@ MainComponent::MainComponent() : synth_wavetable_(*wavetable_),
   volumeLabel.attachToComponent(&volumeSlider, true);
   volumeSlider.addListener(this);
   
+  addAndMakeVisible(&seqTypeDropdown);
+  int id = 1; // can't start at 0
+  for (auto& e : BioSignals::generator_types)
+    seqTypeDropdown.addItem(e.second, id++);
+  seqTypeDropdown.addListener(this);
+  seqTypeDropdown.setSelectedId(1);
+ 
+  
   DebugFunction df = [](juce::String a, juce::String b) {
     juce::Logger* logger = juce::Logger::getCurrentLogger();
     logger->outputDebugString("---juce_serialport---");
@@ -172,13 +180,16 @@ void MainComponent::paint (juce::Graphics& g)
 void MainComponent::resized()
 {
   auto area = getLocalBounds();
-  auto slider_width = 100;
+  auto slider_width = fmin(0.2 * area.getWidth(), 200);
+  auto dropdown_width = fmin(0.3 * area.getWidth(), 300);
   auto sequence_editor_height = area.getHeight() - 200;
   sequence_editor_.setBounds(area.removeFromTop(sequence_editor_height));
 
   tempoSlider.setBounds(area.removeFromLeft(slider_width));
   freqSlider.setBounds(area.removeFromLeft(slider_width));
   volumeSlider.setBounds(area.removeFromLeft(slider_width));
+  seqTypeDropdown.setBounds(area.removeFromLeft(dropdown_width));
+  seqTypeDropdown.setBounds(seqTypeDropdown.getX(), seqTypeDropdown.getY() + 75, seqTypeDropdown.getWidth(), 30);
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
@@ -205,10 +216,9 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
 //      juce::Logger::getCurrentLogger()->outputDebugString("PULSE");
       tempoSlider.setValue(new_val);
     }
-  } else { // from sequencer
+  } else {
 //    juce::Logger::getCurrentLogger()->writeToLog("CALLBACK");
-    sequencer_.setSequence(
-      new BioSignals::FreqRandom(sequence_editor_.getSequence()));
+    updateSequence(seqTypeDropdown.getSelectedId() - 1);
   }
 }
 
@@ -231,6 +241,11 @@ void MainComponent::sliderValueChanged(juce::Slider* slider_source)
   {
     volume = volumeSlider.getValue();
   }
+}
+
+void MainComponent::comboBoxChanged(juce::ComboBox* box_source)
+{
+  updateSequence(box_source->getSelectedId() - 1);
 }
 
 //==============================================================================
@@ -267,4 +282,15 @@ juce::String MainComponent::getPortBlockingSerialDialog(
   }
   
   return choice;
+}
+
+void MainComponent::updateSequence(unsigned int new_seq_idx)
+{
+  sequencer_
+    .setSequence(
+        constructFreqGenerator(
+            BioSignals::generator_types[new_seq_idx].first,
+            sequence_editor_.getSequence()
+        )
+    );
 }
