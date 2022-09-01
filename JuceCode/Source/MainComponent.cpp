@@ -48,7 +48,7 @@ MainComponent::MainComponent() : synth_wavetable_(*wavetable_),
   // GUI stuffs
   addAndMakeVisible(&tempoSlider);
   tempoSlider.addListener(this);
-  tempoSlider.setRange(10.0f, 600.0f);
+  tempoSlider.setRange(10.0f, 2000.0f);
   
   addAndMakeVisible(&freqSlider);
   freqSlider.setRange(20.0f, 12000.0f);
